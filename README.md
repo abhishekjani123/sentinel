@@ -1,5 +1,7 @@
 # Sentinel — AI-Powered Customer Health Monitor
 
+**[Live Demo](https://sentinel-tkwm.onrender.com/)** · Free tier — may take ~30s to wake on first visit
+
 An observability platform that uses AI agents to detect, investigate, and explain production issues **before customers report them**.
 
 Unlike traditional monitoring tools (Datadog, New Relic, Grafana) that are service-centric, Sentinel monitors health **per-customer** and uses AI to automatically generate root cause analysis when anomalies are detected.
