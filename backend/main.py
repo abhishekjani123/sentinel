@@ -1,8 +1,11 @@
 import asyncio
+import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from database import init_db
 from routes.events import router as events_router
@@ -20,9 +23,13 @@ async def lifespan(app: FastAPI):
 
     from agents.health import run_health_engine
     from agents.detector import run_anomaly_detector
+    from simulator import run_simulator
 
     background_tasks.append(asyncio.create_task(run_health_engine()))
     background_tasks.append(asyncio.create_task(run_anomaly_detector()))
+
+    if os.environ.get("ENABLE_SIMULATOR", "true").lower() == "true":
+        background_tasks.append(asyncio.create_task(run_simulator()))
 
     yield
 
@@ -53,6 +60,11 @@ app.include_router(services_router, prefix="/api")
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok", "service": "sentinel"}
+
+
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend" / "dist"
+if FRONTEND_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
 
 
 async def seed_initial_data():

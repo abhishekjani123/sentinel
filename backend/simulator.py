@@ -11,7 +11,9 @@ from datetime import datetime
 
 import httpx
 
-API_URL = "http://localhost:8000/api/events/batch"
+import os
+
+API_URL = os.environ.get("SIMULATOR_API_URL", "http://localhost:8000/api/events/batch")
 
 CUSTOMERS = ["acme", "globex", "initech", "umbrella", "wayne", "stark"]
 
@@ -160,12 +162,17 @@ def generate_event(customer_id: str, service: str, anomaly: AnomalyState) -> dic
 
 
 async def run_simulator():
+    await asyncio.sleep(3)
+
     anomaly = AnomalyState()
     print("[SIMULATOR] Starting event generation...")
     print(f"[SIMULATOR] Customers: {CUSTOMERS}")
     print(f"[SIMULATOR] Services: {SERVICES}")
 
-    async with httpx.AsyncClient(timeout=10) as client:
+    port = os.environ.get("PORT", "8000")
+    url = os.environ.get("SIMULATOR_API_URL", f"http://localhost:{port}/api/events/batch")
+
+    async with httpx.AsyncClient(timeout=10, base_url="") as client:
         while True:
             anomaly.maybe_start_anomaly()
 
@@ -176,7 +183,7 @@ async def run_simulator():
                 batch.append(generate_event(customer, service, anomaly))
 
             try:
-                resp = await client.post(API_URL, json=batch)
+                resp = await client.post(url, json=batch)
                 if resp.status_code == 200:
                     data = resp.json()
                     print(f"[SIMULATOR] Sent {data['count']} events"
