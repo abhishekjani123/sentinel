@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+aiosqlite
+greenlet
+google-generativeai
+pydantic
+python-dotenv
+httpx
